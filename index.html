@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +9,22 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
      
     <style>
+    .chat-input-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f7cbe0;
+    padding: 10px;
+    z-index: 999;
+    border-top: 2px solid #ccc;
+}
+
+/* biar chat terakhir ga ketutup input */
+.chat-container {
+    padding-bottom: 110px;
+}
+
         .chat-container {
             border: 1px solid #ccc;
             height: 100%;
@@ -24,6 +41,13 @@
         .urlhref{
             color: white;
         }
+        
+        .urlhrefbody{
+    color: blue;
+    text-decoration: underline;
+    word-break: break-all;
+}
+
     </style>
 </head>
 <body>
@@ -250,16 +274,25 @@
         <div
          class="chat-container shadow" id="chatContainer">
         </div>
-        <div class="row mt-3" style="background-color: #f7cbe0;margin-bottom: 140px;">
-            <div class="col-9">
-                <input type="text" 
-                style="width:100%;border: 3px solid black;" 
-                class="form-control" id="messageInput" placeholder="Ketik Obrolan Bokep disini">
-            </div>
-            <div class="col-3">
-                <button class="btn btn-primary btn-block" onclick="sendMessage()">Kirim</button>
-            </div>
+        <div class="chat-input-fixed">
+    <div class="row no-gutters">
+        <div class="col-9 pr-1">
+            <input
+                type="text"
+                class="form-control"
+                id="messageInput"
+                placeholder="Ketik Obrolan Bokep disini"
+                style="border: 3px solid black;"
+            >
         </div>
+        <div class="col-3 pl-1">
+            <button class="btn btn-primary btn-block h-100" onclick="sendMessage()">
+                Kirim
+            </button>
+        </div>
+    </div>
+</div>
+
     </div>
     </div>
 
@@ -346,6 +379,13 @@
                 }
             } catch (error) {
                 console.error(error);
+                $('#errorModal').modal('show');
+
+              // auto close 2 detik
+              setTimeout(() => {
+                  $('#errorModal').modal('hide');
+              }, 2000);
+
             } finally {
                 sendButton.innerText = 'Kirim';
                 sendButton.disabled = false;
@@ -357,7 +397,12 @@ async function loadChatMessages() {
 
     const loadingDiv = document.createElement('div');
     loadingDiv.classList.add('message');
-    loadingDiv.innerText = 'Sedang Memuat Chat Bokep Sabar ....';
+    loadingDiv.innerHTML = `
+    <span style="font-weight:bold;font-size:16px">
+        Sedang Memuat Chat Bokep Sabar Bang....
+    </span>
+`;
+
     chatContainer.appendChild(loadingDiv);
 
     const thirtyDaysAgo = new Date();
@@ -377,20 +422,58 @@ async function loadChatMessages() {
             messageDiv.classList.add('message');
             messageDiv.style.fontWeight = "bold";
             const domainSpan = document.createElement('span');
-            domainSpan.style.color = 'orange';
+            domainSpan.style.color = '#d81b60';
             domainSpan.style.fontSize = '13px';
             domainSpan.style.fontWeight = 'bold';
             domainSpan.innerText = record.domain;
 
             const br = document.createElement('br');
 
-            // Periksa jika pesan mengandung URL
-            const message = record.comment;
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const messageWithLinks = message.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+           const message = record.comment;
+const lines = message.split('\n');
 
-            // Tambahkan konten ke dalam pesan
-            messageDiv.innerHTML = `${domainSpan.outerHTML}<br>${messageWithLinks}`;
+const urlRegex = /(https?:\/\/[^\s]+)/gi;
+
+let textParts = [];
+let links = [];
+
+// ambil semua URL
+message.replace(urlRegex, (url) => {
+    links.push(url);
+});
+
+// hapus URL dari teks
+const cleanText = message.replace(urlRegex, '').trim();
+
+let html = domainSpan.outerHTML + '<br>';
+
+// teks biasa
+if (cleanText !== '') {
+    html += `<div>${cleanText.replace(/\n/g, '<br>')}</div>`;
+}
+
+// multiple link → UL
+if (links.length > 1) {
+    html += '<ul>';
+    links.forEach(link => {
+        html += `
+        <li>
+            <a href="${link}" target="_blank" class="urlhrefbody">
+                ${link}
+            </a>
+        </li>`;
+    });
+    html += '</ul>';
+}
+// single link
+else if (links.length === 1) {
+    html += `
+    <a href="${links[0]}" target="_blank" class="urlhrefbody">
+        ${links[0]}
+    </a>`;
+}
+
+messageDiv.innerHTML = html;
 
             const br2 = document.createElement('br');
             const br3 = document.createElement('br');
@@ -444,5 +527,29 @@ async function loadChatMessages() {
         chatContainer.scrollTop = chatContainer.scrollHeight;
     });
     </script>
+    <!-- Modal Error -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Server Error</h5>
+        <button type="button" class="close text-white" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body font-weight-bold">
+        Terjadi gangguan dari server.<br>
+        Coba kirim pesan lagi.<br>
+        Jika masih error, tunggu beberapa saat lagi.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
