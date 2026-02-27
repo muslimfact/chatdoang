@@ -10,6 +10,29 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
      
     <style>
+
+/* checkbox kiri pesan */
+.message-wrapper {
+    display: flex;
+    align-items: flex-start;
+}
+
+.message-checkbox {
+    margin-right: 8px;
+    margin-top: 6px;
+    transform: scale(1.3);
+    cursor: pointer;
+}
+
+/* tombol fixed copy */
+#copySelectedBtn {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: none;
+}
     .chat-input-fixed {
    
     width: 100%;
@@ -302,15 +325,17 @@
     </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
         async function sendMessage() {
             const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value;
-        
+        let message = messageInput.value;
+
+// hapus format HTML comment <!-- -->
+message = message.replace(/<!--\s*(.*?)\s*-->/g, '$1');
             if (message.trim() === '') return;
         
             const sendButton = document.querySelector('.btn-primary');
@@ -424,8 +449,23 @@ async function loadChatMessages() {
         loadingDiv.remove();
 
         data.items.reverse().forEach(record => {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('message-wrapper');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('message-checkbox');
+
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
+            messageDiv.style.fontWeight = "bold";
+
+            // simpan isi asli untuk dicopy nanti
+            messageDiv.setAttribute("data-copy", record.comment);
+
+            wrapper.appendChild(checkbox);
+            wrapper.appendChild(messageDiv);
+
             messageDiv.style.fontWeight = "bold";
             const domainSpan = document.createElement('span');
             domainSpan.style.color = '#d81b60';
@@ -434,53 +474,62 @@ async function loadChatMessages() {
             domainSpan.innerText = record.domain;
 
             const br = document.createElement('br');
+const message = record.comment;
 
-           const message = record.comment;
-const lines = message.split('\n');
+// regex ambil semua URL
+const urlRegex = /(https?:\/\/[^\s]+)/g;
 
-const urlRegex = /(https?:\/\/[^\s]+)/gi;
+let html = domainSpan.outerHTML + '<br><ul style="padding-left:18px">';
 
-let textParts = [];
-let links = [];
+let match;
+let lastIndex = 0;
 
-// ambil semua URL
-message.replace(urlRegex, (url) => {
-    links.push(url);
-});
+while ((match = urlRegex.exec(message)) !== null) {
 
-// hapus URL dari teks
-const cleanText = message.replace(urlRegex, '').trim();
+    const link = match[0];
 
-let html = domainSpan.outerHTML + '<br>';
+    // ambil teks sebelum URL ini
+    const title = message
+        .substring(lastIndex, match.index)
+        .trim();
 
-// teks biasa
-if (cleanText !== '') {
-    html += `<div>${cleanText.replace(/\n/g, '<br>')}</div>`;
-}
-
-// multiple link → UL
-if (links.length > 1) {
-    html += '<ul>';
-    links.forEach(link => {
+    if (title !== '') {
         html += `
-        <li>
+        <li style="margin-bottom:12px">
+            <div style="font-weight:bold;margin-bottom:4px;">
+                ${title}
+            </div>
             <a href="${link}" target="_blank" class="urlhrefbody">
                 ${link}
             </a>
-        </li>`;
-    });
-    html += '</ul>';
+        </li>
+        `;
+    } else {
+        html += `
+        <li style="margin-bottom:12px">
+            <a href="${link}" target="_blank" class="urlhrefbody">
+                ${link}
+            </a>
+        </li>
+        `;
+    }
+
+    lastIndex = urlRegex.lastIndex;
 }
-// single link
-else if (links.length === 1) {
+
+// jika ada teks sisa tanpa link
+const remainingText = message.substring(lastIndex).trim();
+if (remainingText !== '') {
     html += `
-    <a href="${links[0]}" target="_blank" class="urlhrefbody">
-        ${links[0]}
-    </a>`;
+    <li style="font-weight:bold;margin-bottom:8px;">
+        ${remainingText}
+    </li>
+    `;
 }
+
+html += '</ul>';
 
 messageDiv.innerHTML = html;
-
             const br2 = document.createElement('br');
             const br3 = document.createElement('br');
 
@@ -504,8 +553,7 @@ messageDiv.innerHTML = html;
             messageDiv.appendChild(br2);
             messageDiv.appendChild(timeSpan);
             messageDiv.appendChild(br3);
-
-            chatContainer.appendChild(messageDiv);
+chatContainer.appendChild(wrapper);
         });
 
         // Scroll ke bawah
@@ -557,5 +605,54 @@ messageDiv.innerHTML = html;
   </div>
 </div>
 
+<button id="copySelectedBtn" style="font-weight:bold" class="btn btn-danger shadow">
+    Copy Pesan yg Dicentang
+</button>
+
+
 </body>
+<script> 
+
+const copyBtn = document.getElementById('copySelectedBtn');
+
+document.addEventListener('change', function(e) {
+
+    if (e.target.classList.contains('message-checkbox')) {
+
+        const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
+
+        if (checkedBoxes.length > 0) {
+            $(copyBtn).stop(true,true).slideDown(200);
+        } else {
+            $(copyBtn).stop(true,true).slideUp(200);
+        }
+
+    }
+
+});
+
+copyBtn.addEventListener('click', function() {
+
+    const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
+
+    let textToCopy = '';
+
+    checkedBoxes.forEach(box => {
+        const messageDiv = box.nextElementSibling;
+        const originalText = messageDiv.getAttribute("data-copy");
+        textToCopy += originalText + "\n\n";
+    });
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+
+        copyBtn.innerText = "Berhasil Dicopy ✅";
+
+        setTimeout(() => {
+            copyBtn.innerText = "Copy Semua Pesan";
+        }, 1500);
+
+    });
+
+});
+</script>
 </html>
