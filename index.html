@@ -422,6 +422,22 @@
     let message = messageInput.value;
     message = message.replace(/<!--\s*(.*?)\s*-->/g, '$1');
 
+    // cek apakah ada http / https
+const hasLink = /(https?:\/\/[^\s]+)/i.test(message);
+
+if (hasLink) {
+
+    const password = prompt("Pesan mengandung link.\nMasukkan password untuk kirim:");
+
+    if (password !== "sysfoo") {
+        alert("Password salah! Link tidak boleh dikirim.");
+        sendButton.innerText = 'Kirim';
+        sendButton.disabled = false;
+        return; // hentikan proses
+    }
+
+}
+
     const hasImage = imageInput.files.length > 0;
 
     if (message.trim() === '' && !hasImage) return;
