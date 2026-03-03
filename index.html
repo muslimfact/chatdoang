@@ -413,6 +413,111 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
+
+        function appendSingleMessage(record) {
+
+    const chatContainer = document.getElementById('chatContainer');
+
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('message-wrapper');
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.classList.add('message-checkbox');
+
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+    messageDiv.style.fontWeight = "bold";
+
+    messageDiv.setAttribute("data-copy", record.comment);
+
+    wrapper.appendChild(checkbox);
+    wrapper.appendChild(messageDiv);
+
+    const domainSpan = document.createElement('span');
+    domainSpan.style.color = '#d81b60';
+    domainSpan.style.fontSize = '13px';
+    domainSpan.style.fontWeight = 'bold';
+    domainSpan.innerText = record.domain;
+
+    const message = record.comment;
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+    let html = domainSpan.outerHTML + '<br><ul style="padding-left:18px">';
+    let match;
+    let lastIndex = 0;
+
+    while ((match = urlRegex.exec(message)) !== null) {
+        const link = match[0];
+        const title = message.substring(lastIndex, match.index).trim();
+
+        if (title !== '') {
+            html += `
+            <li style="margin-bottom:12px">
+                <div style="font-weight:bold;margin-bottom:4px;">
+                    ${title}
+                </div>
+                <a href="${link}" target="_blank" class="urlhrefbody">
+                    ${link}
+                </a>
+            </li>`;
+        } else {
+            html += `
+            <li style="margin-bottom:12px">
+                <a href="${link}" target="_blank" class="urlhrefbody">
+                    ${link}
+                </a>
+            </li>`;
+        }
+
+        lastIndex = urlRegex.lastIndex;
+    }
+
+    const remainingText = message.substring(lastIndex).trim();
+    if (remainingText !== '') {
+        html += `<li style="font-weight:bold;margin-bottom:8px;">${remainingText}</li>`;
+    }
+
+    html += '</ul>';
+    messageDiv.innerHTML = html;
+
+    // tampilkan gambar jika ada
+    if (record.image_link) {
+        const img = document.createElement("img");
+        img.src = record.image_link;
+        img.style.maxWidth = "300px";
+        img.style.maxHeight = "250px";
+        img.style.marginTop = "8px";
+        img.style.borderRadius = "8px";
+        img.style.cursor = "zoom-in";
+
+        img.onclick = function() {
+            openImageModal(record.image_link);
+        };
+
+        messageDiv.appendChild(img);
+    }
+
+    const createdDate = new Date();
+    const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const formattedDate = createdDate.toLocaleDateString('id-ID', options);
+
+    const timeSpan = document.createElement('span');
+    timeSpan.innerText = formattedDate;
+    timeSpan.style.fontSize = '13px';
+    timeSpan.style.color = 'green';
+    timeSpan.style.fontWeight = 'bold';
+
+    messageDiv.appendChild(document.createElement('br'));
+    messageDiv.appendChild(timeSpan);
+
+    chatContainer.appendChild(wrapper);
+
+    // auto scroll ke bawah
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+
         async function sendMessage() {
 
     const messageInput = document.getElementById('messageInput');
@@ -471,13 +576,19 @@ if (hasLink) {
 
         if (!response.ok) throw new Error("Gagal kirim");
 
+        const result = await response.json();
+
+// append langsung tanpa reload
+appendSingleMessage({
+    domain: data.domain,
+    comment: message,
+    image_link: imageUrl
+});
         // reset input
         messageInput.value = '';
         imageInput.value = '';
         previewWrapper.style.display = "none";
 
-        // reload supaya langsung muncul
-        location.reload();
 
     } catch (error) {
 
