@@ -423,7 +423,8 @@
     } catch (error) {
 
         console.error(error);
-        alert("Gagal upload atau kirim pesan");
+         // tampilkan modal error bootstrap
+    $('#errorModal').modal('show');
 
     } finally {
 
