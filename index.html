@@ -10,6 +10,10 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
      
     <style>
+    @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 /* RADIAL SHIMMER LOADING */
 .image-loading-wrapper {
     position: relative;
@@ -452,7 +456,7 @@
 }
 
 
-        async function sendMessage() {
+async function sendMessage() {
 
     const messageInput = document.getElementById('messageInput');
     const imageInput = document.getElementById('imageInput');
@@ -461,34 +465,35 @@
     let message = messageInput.value;
     message = message.replace(/<!--\s*(.*?)\s*-->/g, '$1');
 
-    // cek apakah ada http / https
-const hasLink = /(https?:\/\/[^\s]+)/i.test(message);
+    const hasLink = /(https?:\/\/[^\s]+)/i.test(message);
 
-if (hasLink) {
-
-    const password = prompt("Pesan mengandung link.\nMasukkan password untuk kirim:");
-
-    if (password !== "sysfoo") {
-        alert("Password salah! Link tidak boleh dikirim.");
-        sendButton.innerText = 'Kirim';
-        sendButton.disabled = false;
-        return; // hentikan proses
+    if (hasLink) {
+        const password = prompt("Pesan mengandung link.\nMasukkan password untuk kirim:");
+        if (password !== "sysfoo") {
+            alert("Password salah!");
+            return;
+        }
     }
 
-}
-
     const hasImage = imageInput.files.length > 0;
-
     if (message.trim() === '' && !hasImage) return;
 
     sendButton.innerText = 'Sedang Mengirim...';
     sendButton.disabled = true;
 
+    // 🔥 tampilkan popup custom
+    const popup = document.getElementById("loadingPopup");
+    const retryText = document.getElementById("retryText");
+
+    popup.style.display = "flex";
+
+    let attempt = 0;
+    const maxRetry = 5;
+
     try {
 
         let imageUrl = "";
 
-        // ✅ Kalau ada gambar → upload dulu
         if (hasImage) {
             imageUrl = await uploadImageToCloudinary(imageInput.files[0]);
         }
@@ -499,36 +504,60 @@ if (hasLink) {
             image_link: imageUrl
         };
 
-        const response = await fetch(
-            'https://poophdpocket.pockethost.io/api/collections/chat_jepang/records',
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+        let success = false;
+
+        while (attempt < maxRetry && !success) {
+            attempt++;
+
+            retryText.innerText = `Percobaan ke-${attempt}`;
+
+            try {
+                const response = await fetch(
+                    'https://poophdpocket.pockethost.io/api/collections/chat_jepang/records',
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    }
+                );
+
+                if (!response.ok) throw new Error("Gagal");
+
+                success = true;
+
+                // sukses → tutup popup
+                popup.style.display = "none";
+
+                appendSingleMessage({
+                    domain: data.domain,
+                    comment: message,
+                    image_link: imageUrl
+                });
+
+                messageInput.value = '';
+                imageInput.value = '';
+                previewWrapper.style.display = "none";
+
+            } catch (err) {
+
+                console.log(`Retry ke-${attempt} gagal`);
+
+                if (attempt >= maxRetry) {
+                    throw err;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
             }
-        );
-
-        if (!response.ok) throw new Error("Gagal kirim");
-
-        const result = await response.json();
-
-// append langsung tanpa reload
-appendSingleMessage({
-    domain: data.domain,
-    comment: message,
-    image_link: imageUrl
-});
-        // reset input
-        messageInput.value = '';
-        imageInput.value = '';
-        previewWrapper.style.display = "none";
-
+        }
 
     } catch (error) {
 
         console.error(error);
-         // tampilkan modal error bootstrap
-    $('#errorModal').modal('show');
+
+        popup.style.display = "none";
+
+        // ❌ kalau gagal 5x
+        $('#errorModal').modal('show');
 
     } finally {
 
@@ -537,7 +566,6 @@ appendSingleMessage({
 
     }
 }
-        
 async function loadChatMessages() {
     const chatContainer = document.getElementById('chatContainer');
 
@@ -813,6 +841,55 @@ chatContainer.appendChild(wrapper);
             box-shadow:0 0 20px black;
             cursor:default;
          ">
+</div>
+
+
+
+
+<div id="loadingPopup" style="
+    display:none;
+    position:fixed;
+    z-index:99999;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.8);
+    justify-content:center;
+    align-items:center;
+">
+
+    <div style="
+        background:#111;
+        padding:20px 25px;
+        border-radius:12px;
+        text-align:center;
+        box-shadow:0 0 20px black;
+        color:white;
+        width:260px;
+    ">
+        <div class="spinner" style="
+            width:50px;
+            height:50px;
+            border:5px solid #444;
+            border-top:5px solid #00e676;
+            border-radius:50%;
+            margin:0 auto 15px;
+            animation:spin 1s linear infinite;
+        "></div>
+
+        <div style="font-weight:bold;font-size:16px;">
+            Sedang mencoba mengirim...
+        </div>
+
+        <div id="retryText" style="
+            margin-top:8px;
+            font-size:14px;
+            color:#ccc;
+        ">
+            Percobaan ke-1
+        </div>
+    </div>
 </div>
 </body>
 <script> 
