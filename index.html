@@ -386,7 +386,7 @@
             }
         }
 
-        // 🔥 UPLOAD KE IMGBB DENGAN EXPIRE 90 HARI
+        // ?? UPLOAD KE IMGBB DENGAN EXPIRE 90 HARI
         async function uploadImageToImgBB(file) {
             const API_KEY = "26c0eb127e809f70a799624e64867975"; // GANTI DENGAN API KEY ASLI ANDA
             const EXPIRATION_SECONDS = 90 * 24 * 3600;
@@ -421,27 +421,43 @@
         });
         function removeImage() { imageInput.value = ""; previewWrapper.style.display = "none"; }
 
-        const copyBtn = document.getElementById('copySelectedBtn');
-        document.addEventListener('change', function(e) {
-            if (e.target.classList.contains('message-checkbox')) {
-                const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
-                if (checkedBoxes.length > 0) $(copyBtn).stop(true,true).slideDown(200);
-                else $(copyBtn).stop(true,true).slideUp(200);
-            }
-        });
-        copyBtn.addEventListener('click', function() {
+document.addEventListener("DOMContentLoaded", function() {
+
+    const copyBtn = document.getElementById('copySelectedBtn');
+
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('message-checkbox')) {
+
             const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
-            let textToCopy = '';
-            checkedBoxes.forEach(box => {
-                const messageDiv = box.nextElementSibling;
-                const originalText = messageDiv.getAttribute("data-copy");
-                textToCopy += originalText + "\n\n";
-            });
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                copyBtn.innerText = "Berhasil Dicopy ?";
-                setTimeout(() => copyBtn.innerText = "Copy Semua Pesan Dicentang", 1500);
-            });
+
+            if (checkedBoxes.length > 0) {
+                copyBtn.style.display = 'block';
+            } else {
+                copyBtn.style.display = 'none';
+            }
+
+        }
+    });
+
+    copyBtn.addEventListener('click', function() {
+        const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
+        let textToCopy = '';
+
+        checkedBoxes.forEach(box => {
+            const messageDiv = box.nextElementSibling;
+            const originalText = messageDiv.getAttribute("data-copy");
+            textToCopy += originalText + "\n\n";
         });
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            copyBtn.innerText = "Berhasil Dicopy ?";
+            setTimeout(() => {
+                copyBtn.innerText = "Copy Pesan yg Dicentang";
+            }, 1500);
+        });
+    });
+
+});
     </script>
 
     <div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
