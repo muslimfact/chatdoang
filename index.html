@@ -1,356 +1,147 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat App</title>
+    <title>Chat App - ImgBB + Cloudinary</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-     
     <style>
     @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-/* RADIAL SHIMMER LOADING */
-.image-loading-wrapper {
-    position: relative;
-    width: 300px;
-    height: 200px;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-top: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: radial-gradient(circle at center, #444 0%, #222 60%, #111 100%);
-}
-
-/* efek animasi radial bergerak */
-.image-loading-wrapper::before {
-    content: "";
-    position: absolute;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%);
-    animation: radialMove 2s infinite linear;
-}
-
-@keyframes radialMove {
-    0% {
-        transform: translate(-25%, -25%) rotate(0deg);
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
-    100% {
-        transform: translate(-25%, -25%) rotate(360deg);
+    .image-loading-wrapper {
+        position: relative;
+        width: 300px;
+        height: 200px;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at center, #444 0%, #222 60%, #111 100%);
     }
-}
-
-/* tulisan tengah */
-.loading-text {
-    position: relative;
-    z-index: 2;
-    color: white;
-    font-weight: bold;
-    font-size: 15px;
-    text-align: center;
-    text-shadow: 0 0 8px rgba(0,0,0,0.8);
-}
-
-/* checkbox kiri pesan */
-.message-wrapper {
-    display: flex;
-    align-items: flex-start;
-}
-
-.message-checkbox {
-    margin-right: 8px;
-    margin-top: 6px;
-    transform: scale(1.3);
-    cursor: pointer;
-}
-
-/* tombol fixed copy */
-#copySelectedBtn {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    display: none;
-}
+    .image-loading-wrapper::before {
+        content: "";
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%);
+        animation: radialMove 2s infinite linear;
+    }
+    @keyframes radialMove {
+        0% { transform: translate(-25%, -25%) rotate(0deg); }
+        100% { transform: translate(-25%, -25%) rotate(360deg); }
+    }
+    .loading-text {
+        position: relative;
+        z-index: 2;
+        color: white;
+        font-weight: bold;
+        font-size: 15px;
+        text-align: center;
+        text-shadow: 0 0 8px rgba(0,0,0,0.8);
+    }
+    .message-wrapper {
+        display: flex;
+        align-items: flex-start;
+    }
+    .message-checkbox {
+        margin-right: 8px;
+        margin-top: 6px;
+        transform: scale(1.3);
+        cursor: pointer;
+    }
+    #copySelectedBtn {
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        display: none;
+    }
     .chat-input-fixed {
-   
-    width: 100%;
-    background-color: #f7cbe0;
-    padding: 10px;
-    z-index: 999;
-    border-top: 2px solid #ccc;
-}
-
-/* biar chat terakhir ga ketutup input */
-.chat-container {
-    flex: 1;                 /* NGAMBIL SISA TINGGI */
-    overflow-y: auto;
-    padding: 10px;
-    border: 1px solid #ccc;
-}
-
-.chat-input {
-    width: 100%;
-    background-color: #f7cbe0;
-    padding: 10px;
-    border-top: 2px solid #ccc;
-}
-
-
-        .message {
-            margin: 10px 0;
-            padding: 5px;
-            background-color: #f2f2f2;
-            border-radius: 5px;
-        }
-        
-        .urlhref{
-            color: #283593  ;
-            font-weight:bold;
-        }
-        
-        .urlhrefbody{
-    color: blue;
-    text-decoration: underline;
-    word-break: break-all;
-}
-
-  @keyframes panicblink{
-        0%{
-        background:#ff0000;
-        }
-        50%{
-        background:#8b0000;
-        }
-        100%{
-        background:#ff0000;
-        }
-        }
-
+        width: 100%;
+        background-color: #f7cbe0;
+        padding: 10px;
+        z-index: 999;
+        border-top: 2px solid #ccc;
+    }
+    .chat-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+    .message {
+        margin: 10px 0;
+        padding: 5px;
+        background-color: #f2f2f2;
+        border-radius: 5px;
+    }
+    .urlhref {
+        color: #283593;
+        font-weight: bold;
+    }
+    .urlhrefbody {
+        color: blue;
+        text-decoration: underline;
+        word-break: break-all;
+    }
     </style>
 </head>
 <body>
-    
-    <div class=" mt-1">
-        <div >
-        <div 
-        id="contentwebid"
-        style="background-color: #e0e0e0  ;
-        color: black;
-        padding: 4px;
-        box-shadow: rgba(0,0,0.5);
-        border:2px solid orange;
-        
-        ">
+    <div class="mt-1">
+        <div id="contentwebid" style="background-color: #e0e0e0; color: black; padding: 4px; box-shadow: rgba(0,0,0.5); border:2px solid orange;">
             <p style="font-weight: bold">Yg Web Error ga bisa Nonton . Pindah Ke Web Cadangan ini</p>
             <ul>
-                
-                 <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://cindo.bosindo.my.id">
-                    https://cindo.bosindo.my.id
-                    </a>
-                </li>
-                 <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://jaksel.bosindo.my.id">
-                    https://jaksel.bosindo.my.id
-                    </a>
-                </li>
-                
-                 <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://udin.bosindo.my.id">
-                    https://udin.bosindo.my.id
-                    </a>
-                </li>
-                 <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://play21.bosindo.my.id">
-                    https://play21.bosindo.my.id/
-                    </a>
-                </li>
-                <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://orangkaya.bosindo.my.id">
-                    https://orangkaya.bosindo.my.id
-                    </a>
-                </li>
-               <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://anto.bosindo.my.id">
-                    https://anto.bosindo.my.id
-                    </a>
-                </li>
-               
-                <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://cinema.bosindo.my.id">
-                    https://cinema.bosindo.my.id
-                    </a>
-                </li>
-                  <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://toge.bosindo.my.id">
-                    https://toge.bosindo.my.id
-                    </a>
-                </li>
-                  <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://jaka.bosindo.my.id">
-                    https://jaka.bosindo.my.id
-                    </a>
-                </li>
-                 <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://pargoi.bosindo.my.id">
-                    https://pargoi.bosindo.my.id
-                    </a>
-                </li>
-                 <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://jepang.bosindo.my.id">
-                    https://jepang.bosindo.my.id
-                    </a>
-                </li>
-                <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://bule.bosindo.my.id">
-                    https://bule.bosindo.my.id/
-                    </a>
-                </li>
-                 <li>
-                    <a
-                    class="urlhref"
-                    target="_blank"
-                     href="https://bimo.bosindo.my.id">
-                    https://bimo.bosindo.my.id/
-                    </a>
-                </li>
-               
+                <li><a class="urlhref" target="_blank" href="https://cindo.bosindo.my.id">https://cindo.bosindo.my.id</a></li>
+                <li><a class="urlhref" target="_blank" href="https://jaksel.bosindo.my.id">https://jaksel.bosindo.my.id</a></li>
+                <li><a class="urlhref" target="_blank" href="https://udin.bosindo.my.id">https://udin.bosindo.my.id</a></li>
+                <li><a class="urlhref" target="_blank" href="https://play21.bosindo.my.id">https://play21.bosindo.my.id/</a></li>
+                <li><a class="urlhref" target="_blank" href="https://orangkaya.bosindo.my.id">https://orangkaya.bosindo.my.id</a></li>
+                <li><a class="urlhref" target="_blank" href="https://anto.bosindo.my.id">https://anto.bosindo.my.id</a></li>
+                <li><a class="urlhref" target="_blank" href="https://cinema.bosindo.my.id">https://cinema.bosindo.my.id</a></li>
+                <li><a class="urlhref" target="_blank" href="https://toge.bosindo.my.id">https://toge.bosindo.my.id</a></li>
+                <li><a class="urlhref" target="_blank" href="https://jaka.bosindo.my.id">https://jaka.bosindo.my.id</a></li>
+                <li><a class="urlhref" target="_blank" href="https://pargoi.bosindo.my.id">https://pargoi.bosindo.my.id</a></li>
+                <li><a class="urlhref" target="_blank" href="https://jepang.bosindo.my.id">https://jepang.bosindo.my.id</a></li>
+                <li><a class="urlhref" target="_blank" href="https://bule.bosindo.my.id">https://bule.bosindo.my.id/</a></li>
+                <li><a class="urlhref" target="_blank" href="https://bimo.bosindo.my.id">https://bimo.bosindo.my.id/</a></li>
             </ul>
         </div>
-
-                <div style="
-        background:red;
-        color:white;
-        padding:4px;
-        
-        border-radius:10px;
-        text-align:center;
-        font-weight:bold;
-        font-family:Arial, sans-serif;
-        font-size:13px;
-        
-        ">
-        ⚠️ WEBSITE berdomain   <br/> <b>.vercel.app</b> AKAN SEGERA DI NONAKTIFKAN KARENA BIAYA SEWA Website Mahal ⚠️ <br>
-        Penutupan Hingga Akhir Maret 2026<br/> HARAP PINDAH KE WEB Link DI ATAS <br/> Biar tetep Bisa 
-        Nonton
+        <div style="background:red; color:white; padding:4px; border-radius:10px; text-align:center; font-weight:bold; font-family:Arial, sans-serif; font-size:13px;">
+            ⚠️ WEBSITE berdomain <br/> <b>.vercel.app</b> AKAN SEGERA DI NONAKTIFKAN KARENA BIAYA SEWA Website Mahal ⚠️ <br>
+            Penutupan Hingga Akhir Maret 2026<br/> HARAP PINDAH KE WEB Link DI ATAS <br/> Biar tetep Bisa Nonton
         </div>
-
-      
     </div>
-
     <div>
-        
         <h5 style="font-weight: bold">Chat Admin</h5>
-        <div
-         class="chat-container shadow" id="chatContainer">
-        </div>
-        
+        <div class="chat-container shadow" id="chatContainer"></div>
         <div class="chat-input-fixed">
-          
-    <div class="row no-gutters">
-
-        <div class="col-9 pr-1">
-
-    <!-- Preview Gambar -->
-    <div id="imagePreviewWrapper" style="display:none; margin-bottom:6px;">
-        <div style="position:relative; display:inline-block;">
-            <img id="imagePreview" 
-                 style="max-height:180px; border-radius:8px; border:2px solid #ddd;">
-            <span onclick="removeImage()" 
-                  style="position:absolute;top:5px;left:5px;
-                         background:red;color:white;
-                         width:22px;height:22px;
-                         border-radius:50%;
-                         text-align:center;
-                         line-height:22px;
-                         cursor:pointer;
-                         font-weight:bold;">
-                ×
-            </span>
+            <div class="row no-gutters">
+                <div class="col-9 pr-1">
+                    <div id="imagePreviewWrapper" style="display:none; margin-bottom:6px;">
+                        <div style="position:relative; display:inline-block;">
+                            <img id="imagePreview" style="max-height:180px; border-radius:8px; border:2px solid #ddd;">
+                            <span onclick="removeImage()" style="position:absolute;top:5px;left:5px; background:red;color:white; width:22px;height:22px; border-radius:50%; text-align:center; line-height:22px; cursor:pointer; font-weight:bold;">×</span>
+                        </div>
+                    </div>
+                    <input type="file" id="imageInput" accept="image/*" style="display:none">
+                    <h6>Tambah Gambar klik tanda + Dikiri</h6>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <button style="border-radius:30%;font-size:20px" class="btn btn-success border" type="button" onclick="document.getElementById('imageInput').click()">+</button>
+                        </div>
+                        <input type="text" class="form-control" id="messageInput" placeholder="Ketik Obrolan disini..." style="border: 3px solid black;">
+                    </div>
+                </div>
+                <div class="col-3 pl-1 d-flex align-items-end">
+                    <button class="btn btn-primary btn-block" style="height:42px;" onclick="sendMessage()">Kirim</button>
+                </div>
+            </div>
         </div>
-    </div>
-
-    <!-- Input Tersembunyi -->
-    <input type="file" id="imageInput" accept="image/*" style="display:none">
-
-    <!-- Input Chat + Tombol Upload -->
-        <h6>Tambah Gambar klik tanda + Dikiri </h6>
-    <div class="input-group">
-        <div class="input-group-prepend">
-            <button style="border-radius:30%;font-size:20px" class="btn btn-success border"
-                    type="button"
-                    onclick="document.getElementById('imageInput').click()"
-                    style="font-size:20px;font-weight:bold;">
-                +
-            </button>
-        </div>
-
-        <input
-            type="text"
-            class="form-control"
-            id="messageInput"
-            placeholder="Ketik Obrolan disini..."
-            style="border: 3px solid black;"
-        >
-    </div>
-
-</div>
-        <div class="col-3 pl-1 d-flex align-items-end">
-    <button class="btn btn-primary btn-block" 
-            style="height:42px;"
-            onclick="sendMessage()">
-        Kirim
-    </button>
-</div>
-    </div>
-</div>
-
-    </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -358,669 +149,324 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
+        // Fungsi untuk mengganti domain gambar dari i.ibb.co ke i.ibb.co.com
+        function convertImgBBUrl(url) {
+            if (url && url.includes('i.ibb.co/')) {
+                return url.replace('i.ibb.co/', 'i.ibb.co.com/');
+            }
+            return url;
+        }
 
         function appendSingleMessage(record) {
-
-    const chatContainer = document.getElementById('chatContainer');
-
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('message-wrapper');
-
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.classList.add('message-checkbox');
-
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message');
-    messageDiv.style.fontWeight = "bold";
-
-    messageDiv.setAttribute("data-copy", record.comment);
-
-    wrapper.appendChild(checkbox);
-    wrapper.appendChild(messageDiv);
-
-    const domainSpan = document.createElement('span');
-    domainSpan.style.color = '#d81b60';
-    domainSpan.style.fontSize = '13px';
-    domainSpan.style.fontWeight = 'bold';
-    domainSpan.innerText = record.domain;
-
-    const message = record.comment;
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-    let html = domainSpan.outerHTML + '<br><ul style="padding-left:18px">';
-    let match;
-    let lastIndex = 0;
-
-    while ((match = urlRegex.exec(message)) !== null) {
-        const link = match[0];
-        const title = message.substring(lastIndex, match.index).trim();
-
-        if (title !== '') {
-            html += `
-            <li style="margin-bottom:12px">
-                <div style="font-weight:bold;margin-bottom:4px;">
-                    ${title}
-                </div>
-                <a href="${link}" target="_blank" class="urlhrefbody">
-                    ${link}
-                </a>
-            </li>`;
-        } else {
-            html += `
-            <li style="margin-bottom:12px">
-                <a href="${link}" target="_blank" class="urlhrefbody">
-                    ${link}
-                </a>
-            </li>`;
-        }
-
-        lastIndex = urlRegex.lastIndex;
-    }
-
-    const remainingText = message.substring(lastIndex).trim();
-    if (remainingText !== '') {
-        html += `<li style="font-weight:bold;margin-bottom:8px;">${remainingText}</li>`;
-    }
-
-    html += '</ul>';
-    messageDiv.innerHTML = html;
-
-    // tampilkan gambar jika ada
-    if (record.image_link) {
-        const img = document.createElement("img");
-        img.src = record.image_link;
-        img.style.maxWidth = "300px";
-        img.style.maxHeight = "250px";
-        img.style.marginTop = "8px";
-        img.style.borderRadius = "8px";
-        img.style.cursor = "zoom-in";
-
-        img.onclick = function() {
-            openImageModal(record.image_link);
-        };
-
-        messageDiv.appendChild(img);
-    }
-
-    const createdDate = new Date();
-    const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-    const formattedDate = createdDate.toLocaleDateString('id-ID', options);
-
-    const timeSpan = document.createElement('span');
-    timeSpan.innerText = formattedDate;
-    timeSpan.style.fontSize = '13px';
-    timeSpan.style.color = 'green';
-    timeSpan.style.fontWeight = 'bold';
-
-    messageDiv.appendChild(document.createElement('br'));
-    messageDiv.appendChild(timeSpan);
-
-    chatContainer.appendChild(wrapper);
-
-    // auto scroll ke bawah
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-}
-
-
-async function sendMessage() {
-
-    const messageInput = document.getElementById('messageInput');
-    const imageInput = document.getElementById('imageInput');
-    const sendButton = document.querySelector('.btn-primary');
-
-    let message = messageInput.value;
-    message = message.replace(/<!--\s*(.*?)\s*-->/g, '$1');
-
-    const hasLink = /(https?:\/\/[^\s]+)/i.test(message);
-
-    if (hasLink) {
-        const password = prompt("Pesan mengandung link.\nMasukkan password untuk kirim:");
-        if (password !== "sysfoo") {
-            alert("Password salah!");
-            return;
-        }
-    }
-
-    const hasImage = imageInput.files.length > 0;
-    if (message.trim() === '' && !hasImage) return;
-
-    sendButton.innerText = 'Sedang Mengirim...';
-    sendButton.disabled = true;
-
-    // 🔥 tampilkan popup custom
-    const popup = document.getElementById("loadingPopup");
-    const retryText = document.getElementById("retryText");
-
-    popup.style.display = "flex";
-
-    let attempt = 0;
-    const maxRetry = 5;
-
-    try {
-
-        let imageUrl = "";
-
-        if (hasImage) {
-            imageUrl = await uploadImageToCloudinary(imageInput.files[0]);
-        }
-
-        const data = {
-            domain: document.referrer,
-            comment: message,
-            image_link: imageUrl
-        };
-
-        let success = false;
-
-        while (attempt < maxRetry && !success) {
-            attempt++;
-
-            retryText.innerText = `Percobaan ke-${attempt}`;
-
-            try {
-                const response = await fetch(
-                    'https://poophdpocket.pockethost.io/api/collections/chat_jepang/records',
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    }
-                );
-
-                if (!response.ok) throw new Error("Gagal");
-
-                success = true;
-
-                // sukses → tutup popup
-                popup.style.display = "none";
-
-                appendSingleMessage({
-                    domain: data.domain,
-                    comment: message,
-                    image_link: imageUrl
-                });
-
-                messageInput.value = '';
-                imageInput.value = '';
-                previewWrapper.style.display = "none";
-
-            } catch (err) {
-
-                console.log(`Retry ke-${attempt} gagal`);
-
-                if (attempt >= maxRetry) {
-                    throw err;
-                }
-
-                await new Promise(resolve => setTimeout(resolve, 1500));
-            }
-        }
-
-    } catch (error) {
-
-        console.error(error);
-
-        popup.style.display = "none";
-
-        // ❌ kalau gagal 5x
-        $('#errorModal').modal('show');
-
-    } finally {
-
-        sendButton.innerText = 'Kirim';
-        sendButton.disabled = false;
-
-    }
-}
-async function loadChatMessages() {
-    const chatContainer = document.getElementById('chatContainer');
-
-    const loadingDiv = document.createElement('div');
-    loadingDiv.classList.add('message');
-    loadingDiv.innerHTML = `
-    <span style="font-weight:bold;font-size:16px">
-        Sedang Memuat Chat Bokep Sabar Bang...., <br/> Refresh web nya kalo lama 
-    </span>
-`;
-
-    chatContainer.appendChild(loadingDiv);
-
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 10);
-
-    const formattedDate = `${thirtyDaysAgo.getFullYear()}-${String(thirtyDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(thirtyDaysAgo.getDate()).padStart(2, '0')}`;
-
-    try {
-        const response = await fetch(`https://poophdpocket.pockethost.io/api/collections/chat_jepang/records?perPage=500&sort=-created`);
-        // const response = await fetch(`https://poophdpocket.pockethost.io/api/collections/chat_jepang/records?perPage=5000&filter=(created>'${formattedDate}')`);
-        const data = await response.json();
-        // Hapus loading
-        loadingDiv.remove();
-
-        data.items.reverse().forEach(record => {
+            const chatContainer = document.getElementById('chatContainer');
             const wrapper = document.createElement('div');
             wrapper.classList.add('message-wrapper');
-
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.classList.add('message-checkbox');
-
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
             messageDiv.style.fontWeight = "bold";
-
-            // simpan isi asli untuk dicopy nanti
             messageDiv.setAttribute("data-copy", record.comment);
-
             wrapper.appendChild(checkbox);
             wrapper.appendChild(messageDiv);
 
-            messageDiv.style.fontWeight = "bold";
             const domainSpan = document.createElement('span');
             domainSpan.style.color = '#d81b60';
             domainSpan.style.fontSize = '13px';
             domainSpan.style.fontWeight = 'bold';
             domainSpan.innerText = record.domain;
 
-            const br = document.createElement('br');
-const message = record.comment;
+            const message = record.comment;
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            let html = domainSpan.outerHTML + '<br><ul style="padding-left:18px">';
+            let match, lastIndex = 0;
+            while ((match = urlRegex.exec(message)) !== null) {
+                const link = match[0];
+                const title = message.substring(lastIndex, match.index).trim();
+                if (title !== '') {
+                    html += `<li style="margin-bottom:12px"><div style="font-weight:bold;margin-bottom:4px;">${title}</div><a href="${link}" target="_blank" class="urlhrefbody">${link}</a></li>`;
+                } else {
+                    html += `<li style="margin-bottom:12px"><a href="${link}" target="_blank" class="urlhrefbody">${link}</a></li>`;
+                }
+                lastIndex = urlRegex.lastIndex;
+            }
+            const remainingText = message.substring(lastIndex).trim();
+            if (remainingText !== '') {
+                html += `<li style="font-weight:bold;margin-bottom:8px;">${remainingText}</li>`;
+            }
+            html += '</ul>';
+            messageDiv.innerHTML = html;
 
-// regex ambil semua URL
-const urlRegex = /(https?:\/\/[^\s]+)/g;
+            // Tampilkan gambar jika ada (support ImgBB dan Cloudinary)
+            if (record.image_link && record.image_link !== "") {
+                let finalImageUrl = record.image_link;
+                // Konversi URL ImgBB ke i.ibb.co.com
+                if (finalImageUrl.includes('i.ibb.co/')) {
+                    finalImageUrl = convertImgBBUrl(finalImageUrl);
+                }
+                
+                const loadingWrapper = document.createElement("div");
+                loadingWrapper.className = "image-loading-wrapper";
+                const loadingText = document.createElement("div");
+                loadingText.className = "loading-text";
+                loadingText.innerText = "Sedang load gambar...";
+                loadingWrapper.appendChild(loadingText);
+                messageDiv.appendChild(loadingWrapper);
 
-let html = domainSpan.outerHTML + '<br><ul style="padding-left:18px">';
+                const img = document.createElement("img");
+                img.src = finalImageUrl;
+                img.style.maxWidth = "300px";
+                img.style.maxHeight = "250px";
+                img.style.display = "none";
+                img.style.marginTop = "8px";
+                img.style.borderRadius = "8px";
+                img.style.cursor = "zoom-in";
+                img.style.transition = "0.2s";
 
-let match;
-let lastIndex = 0;
+                img.onload = function() { loadingWrapper.remove(); img.style.display = "block"; };
+                img.onerror = function() { loadingWrapper.innerHTML = "<span style='color:red;font-weight:bold'>Gagal memuat gambar</span>"; };
+                img.onclick = function() { openImageModal(finalImageUrl); };
+                messageDiv.appendChild(img);
+            }
 
-while ((match = urlRegex.exec(message)) !== null) {
-
-    const link = match[0];
-
-    // ambil teks sebelum URL ini
-    const title = message
-        .substring(lastIndex, match.index)
-        .trim();
-
-    if (title !== '') {
-        html += `
-        <li style="margin-bottom:12px">
-            <div style="font-weight:bold;margin-bottom:4px;">
-                ${title}
-            </div>
-            <a href="${link}" target="_blank" class="urlhrefbody">
-                ${link}
-            </a>
-        </li>
-        `;
-    } else {
-        html += `
-        <li style="margin-bottom:12px">
-            <a href="${link}" target="_blank" class="urlhrefbody">
-                ${link}
-            </a>
-        </li>
-        `;
-    }
-
-    lastIndex = urlRegex.lastIndex;
-}
-
-// jika ada teks sisa tanpa link
-const remainingText = message.substring(lastIndex).trim();
-if (remainingText !== '') {
-    html += `
-    <li style="font-weight:bold;margin-bottom:8px;">
-        ${remainingText}
-    </li>
-    `;
-}
-
-html += '</ul>';
-
-messageDiv.innerHTML = html;
-            // tampilkan gambar jika ada
-
-if (record.image_link && record.image_link !== "") {
-
-    // wrapper shimmer
-    const loadingWrapper = document.createElement("div");
-    loadingWrapper.className = "image-loading-wrapper";
-
-    const loadingText = document.createElement("div");
-    loadingText.className = "loading-text";
-    loadingText.innerText = "Sedang load gambar...";
-
-    loadingWrapper.appendChild(loadingText);
-    messageDiv.appendChild(loadingWrapper);
-
-    const img = document.createElement("img");
-    img.src = record.image_link;
-    img.style.maxWidth = "300px";
-    img.style.maxHeight = "250px";
-    img.style.display = "none"; // sembunyikan dulu
-    img.style.marginTop = "8px";
-    img.style.borderRadius = "8px";
-    img.style.cursor = "zoom-in";
-    img.style.transition = "0.2s";
-
-    // kalau gambar berhasil load
-    img.onload = function() {
-        loadingWrapper.remove();
-        img.style.display = "block";
-    };
-
-    // kalau gambar gagal load
-    img.onerror = function() {
-        loadingWrapper.innerHTML = "<span style='color:red;font-weight:bold'>Gagal memuat gambar</span>";
-    };
-
-    // klik preview
-    img.onclick = function() {
-        openImageModal(record.image_link);
-    };
-
-    messageDiv.appendChild(img);
-}
-            const br2 = document.createElement('br');
-            const br3 = document.createElement('br');
-
-            const createdDate = new Date(record.created);
+            const createdDate = new Date(record.created || new Date());
             const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
             const formattedDate = createdDate.toLocaleDateString('id-ID', options);
-
             const timeSpan = document.createElement('span');
             timeSpan.innerText = formattedDate;
             timeSpan.style.fontSize = '13px';
             timeSpan.style.color = 'green';
             timeSpan.style.fontWeight = 'bold';
 
-            // Menampilkan alamat IP
-            const ipSpan = document.createElement('span');
-            ipSpan.innerText = `IP: ${record.ip_address}`;
-            ipSpan.style.fontSize = '13px';
-            ipSpan.style.color = 'blue';
-            ipSpan.style.fontWeight = 'bold';
-
-            messageDiv.appendChild(br2);
+            messageDiv.appendChild(document.createElement('br'));
             messageDiv.appendChild(timeSpan);
-            messageDiv.appendChild(br3);
-chatContainer.appendChild(wrapper);
-        });
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
 
-        // Scroll ke bawah
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    } catch (error) {
-        console.error(error);
-        // Tampilkan pesan error jika terjadi masalah
-        loadingDiv.innerText = 'Gagal memuat chat. lu refresh lagi web nya boss, KALO UDAH BERKALI KALI MASIH GAGAL BERARTI SERVER LAGI GANGGUAN. COBA BEBERAPA SAAT LAGI';
-    }
-}
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const imageInput = document.getElementById('imageInput');
+            const sendButton = document.querySelector('.btn-primary');
+            let message = messageInput.value.replace(/<!--\s*(.*?)\s*-->/g, '$1');
+            const hasLink = /(https?:\/\/[^\s]+)/i.test(message);
+            if (hasLink) {
+                const password = prompt("Pesan mengandung link.\nMasukkan password untuk kirim:");
+                if (password !== "sysfoo") { alert("Password salah!"); return; }
+            }
+            const hasImage = imageInput.files.length > 0;
+            if (message.trim() === '' && !hasImage) return;
 
+            sendButton.innerText = 'Sedang Mengirim...';
+            sendButton.disabled = true;
+            const popup = document.getElementById("loadingPopup");
+            const retryText = document.getElementById("retryText");
+            popup.style.display = "flex";
+            let attempt = 0, maxRetry = 5;
+            try {
+                let imageUrl = "";
+                if (hasImage) {
+                    imageUrl = await uploadImageToImgBB(imageInput.files[0]);
+                    imageUrl = convertImgBBUrl(imageUrl);
+                }
+                const data = { domain: document.referrer, comment: message, image_link: imageUrl };
+                let success = false;
+                while (attempt < maxRetry && !success) {
+                    attempt++;
+                    retryText.innerText = `Percobaan ke-${attempt}`;
+                    try {
+                        const response = await fetch('https://poophdpocket.pockethost.io/api/collections/chat_jepang/records', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+                        });
+                        if (!response.ok) throw new Error("Gagal");
+                        success = true;
+                        popup.style.display = "none";
+                        appendSingleMessage({ domain: data.domain, comment: message, image_link: imageUrl });
+                        messageInput.value = '';
+                        imageInput.value = '';
+                        document.getElementById('imagePreviewWrapper').style.display = "none";
+                    } catch (err) {
+                        if (attempt >= maxRetry) throw err;
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                    }
+                }
+            } catch (error) {
+                popup.style.display = "none";
+                $('#errorModal').modal('show');
+            } finally {
+                sendButton.innerText = 'Kirim';
+                sendButton.disabled = false;
+            }
+        }
 
+        async function loadChatMessages() {
+            const chatContainer = document.getElementById('chatContainer');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('message');
+            loadingDiv.innerHTML = `<span style="font-weight:bold;font-size:16px">Sedang Memuat Chat... Refresh web nya kalo lama</span>`;
+            chatContainer.appendChild(loadingDiv);
+            try {
+                const response = await fetch(`https://poophdpocket.pockethost.io/api/collections/chat_jepang/records?perPage=500&sort=-created`);
+                const data = await response.json();
+                loadingDiv.remove();
+                data.items.reverse().forEach(record => {
+                    const wrapper = document.createElement('div');
+                    wrapper.classList.add('message-wrapper');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.classList.add('message-checkbox');
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('message');
+                    messageDiv.style.fontWeight = "bold";
+                    messageDiv.setAttribute("data-copy", record.comment);
+                    wrapper.appendChild(checkbox);
+                    wrapper.appendChild(messageDiv);
+                    const domainSpan = document.createElement('span');
+                    domainSpan.style.color = '#d81b60';
+                    domainSpan.style.fontSize = '13px';
+                    domainSpan.style.fontWeight = 'bold';
+                    domainSpan.innerText = record.domain;
+                    const message = record.comment;
+                    const urlRegex = /(https?:\/\/[^\s]+)/g;
+                    let html = domainSpan.outerHTML + '<br><ul style="padding-left:18px">';
+                    let match, lastIndex = 0;
+                    while ((match = urlRegex.exec(message)) !== null) {
+                        const link = match[0];
+                        const title = message.substring(lastIndex, match.index).trim();
+                        if (title !== '') {
+                            html += `<li style="margin-bottom:12px"><div style="font-weight:bold;margin-bottom:4px;">${title}</div><a href="${link}" target="_blank" class="urlhrefbody">${link}</a></li>`;
+                        } else {
+                            html += `<li style="margin-bottom:12px"><a href="${link}" target="_blank" class="urlhrefbody">${link}</a></li>`;
+                        }
+                        lastIndex = urlRegex.lastIndex;
+                    }
+                    const remainingText = message.substring(lastIndex).trim();
+                    if (remainingText !== '') html += `<li style="font-weight:bold;margin-bottom:8px;">${remainingText}</li>`;
+                    html += '</ul>';
+                    messageDiv.innerHTML = html;
+                    
+                    if (record.image_link && record.image_link !== "") {
+                        let finalImageUrl = record.image_link;
+                        if (finalImageUrl.includes('i.ibb.co/')) {
+                            finalImageUrl = convertImgBBUrl(finalImageUrl);
+                        }
+                        const loadingWrapper = document.createElement("div");
+                        loadingWrapper.className = "image-loading-wrapper";
+                        const loadingText = document.createElement("div");
+                        loadingText.className = "loading-text";
+                        loadingText.innerText = "Sedang load gambar...";
+                        loadingWrapper.appendChild(loadingText);
+                        messageDiv.appendChild(loadingWrapper);
+                        const img = document.createElement("img");
+                        img.src = finalImageUrl;
+                        img.style.maxWidth = "300px";
+                        img.style.maxHeight = "250px";
+                        img.style.display = "none";
+                        img.style.marginTop = "8px";
+                        img.style.borderRadius = "8px";
+                        img.style.cursor = "zoom-in";
+                        img.onload = function() { loadingWrapper.remove(); img.style.display = "block"; };
+                        img.onerror = function() { loadingWrapper.innerHTML = "<span style='color:red;font-weight:bold'>Gagal memuat gambar</span>"; };
+                        img.onclick = function() { openImageModal(finalImageUrl); };
+                        messageDiv.appendChild(img);
+                    }
+                    const createdDate = new Date(record.created);
+                    const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+                    const formattedDate = createdDate.toLocaleDateString('id-ID', options);
+                    const timeSpan = document.createElement('span');
+                    timeSpan.innerText = formattedDate;
+                    timeSpan.style.fontSize = '13px';
+                    timeSpan.style.color = 'green';
+                    timeSpan.style.fontWeight = 'bold';
+                    messageDiv.appendChild(document.createElement('br'));
+                    messageDiv.appendChild(timeSpan);
+                    chatContainer.appendChild(wrapper);
+                });
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } catch (error) {
+                loadingDiv.innerText = 'Gagal memuat chat. Refresh lagi, kalo masih error berarti server gangguan.';
+            }
+        }
 
-        
-
-
-
-
-
+        // 🔥 UPLOAD KE IMGBB DENGAN EXPIRE 90 HARI
+        async function uploadImageToImgBB(file) {
+            const API_KEY = "26c0eb127e809f70a799624e64867975"; // GANTI DENGAN API KEY ASLI ANDA
+            const EXPIRATION_SECONDS = 90 * 24 * 3600;
+            const formData = new FormData();
+            formData.append("key", API_KEY);
+            formData.append("image", file);
+            formData.append("expiration", EXPIRATION_SECONDS);
+            const response = await fetch("https://api.imgbb.com/1/upload", { method: "POST", body: formData });
+            const result = await response.json();
+            if (!result.success) throw new Error("ImgBB Upload Gagal: " + (result.error?.message || "Unknown error"));
+            return result.data.url;
+        }
 
         loadChatMessages();
 
-         document.addEventListener('DOMContentLoaded', function() {
-        const chatContainer = document.getElementById('chatContainer');
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    });
+        const imageModal = document.getElementById("imageModal");
+        const modalImage = document.getElementById("modalImage");
+        function openImageModal(src) { modalImage.src = src; imageModal.style.display = "flex"; document.body.style.overflow = "hidden"; }
+        function closeImageModal() { imageModal.style.display = "none"; modalImage.src = ""; document.body.style.overflow = "auto"; }
+        document.getElementById("closeModalBtn")?.addEventListener("click", closeImageModal);
+        imageModal?.addEventListener("click", function(e) { if (e.target === imageModal) closeImageModal(); });
+
+        const imageInput = document.getElementById("imageInput");
+        const previewWrapper = document.getElementById("imagePreviewWrapper");
+        const previewImg = document.getElementById("imagePreview");
+        imageInput.addEventListener("change", function() {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) { previewImg.src = e.target.result; previewWrapper.style.display = "block"; };
+            reader.readAsDataURL(file);
+        });
+        function removeImage() { imageInput.value = ""; previewWrapper.style.display = "none"; }
+
+        const copyBtn = document.getElementById('copySelectedBtn');
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('message-checkbox')) {
+                const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
+                if (checkedBoxes.length > 0) $(copyBtn).stop(true,true).slideDown(200);
+                else $(copyBtn).stop(true,true).slideUp(200);
+            }
+        });
+        copyBtn.addEventListener('click', function() {
+            const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
+            let textToCopy = '';
+            checkedBoxes.forEach(box => {
+                const messageDiv = box.nextElementSibling;
+                const originalText = messageDiv.getAttribute("data-copy");
+                textToCopy += originalText + "\n\n";
+            });
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                copyBtn.innerText = "Berhasil Dicopy ?";
+                setTimeout(() => copyBtn.innerText = "Copy Semua Pesan Dicentang", 1500);
+            });
+        });
     </script>
-    <!-- Modal Error -->
-<div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Server Error</h5>
-        <button type="button" class="close text-white" data-dismiss="modal">
-          <span>&times;</span>
-        </button>
-      </div>
-      <div class="modal-body font-weight-bold">
-        Coba lu Klik Kirim pesan lagi<br>
-        jika ga ke kirim trus menerus <br>
-       berarti server lagi gangguan lu  tunggu beberapa saat lagi.
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-          Tutup
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<button id="copySelectedBtn" style="font-weight:bold" class="btn btn-danger shadow">
-    Copy Pesan yg Dicentang
-</button>
-
-
-<!-- Image Preview Modal -->
-<!-- Image Preview Modal -->
-<div id="imageModal" 
-     style="
-        display:none;
-        position:fixed;
-        z-index:99999;
-        left:0;
-        top:0;
-        width:100%;
-        height:100%;
-        background:rgba(0,0,0,0.9);
-        justify-content:center;
-        align-items:center;
-     ">
-
-    <!-- Tombol Close -->
-    <div id="closeModalBtn"
-         style="
-            position:absolute;
-            top:20px;
-            right:20px;
-            width:40px;
-            height:40px;
-            background:red;
-            color:white;
-            border-radius:50%;
-            text-align:center;
-            line-height:40px;
-            font-size:22px;
-            font-weight:bold;
-            cursor:pointer;
-            box-shadow:0 0 10px black;
-         ">
-        ×
-    </div>
-
-    <img id="modalImage"
-         style="
-            max-width:95%;
-            max-height:95%;
-            border-radius:10px;
-            box-shadow:0 0 20px black;
-            cursor:default;
-         ">
-</div>
-
-
-
-
-<div id="loadingPopup" style="
-    display:none;
-    position:fixed;
-    z-index:99999;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.8);
-    justify-content:center;
-    align-items:center;
-">
-
-    <div style="
-        background:#111;
-        padding:20px 25px;
-        border-radius:12px;
-        text-align:center;
-        box-shadow:0 0 20px black;
-        color:white;
-        width:260px;
-    ">
-        <div class="spinner" style="
-            width:50px;
-            height:50px;
-            border:5px solid #444;
-            border-top:5px solid #00e676;
-            border-radius:50%;
-            margin:0 auto 15px;
-            animation:spin 1s linear infinite;
-        "></div>
-
-        <div style="font-weight:bold;font-size:16px;">
-            Sedang mencoba mengirim...
-        </div>
-
-        <div id="retryText" style="
-            margin-top:8px;
-            font-size:14px;
-            color:#ccc;
-        ">
-            Percobaan ke-1
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white"><h5 class="modal-title">Server Error</h5><button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button></div>
+                <div class="modal-body font-weight-bold">Coba lu Klik Kirim pesan lagi<br> jika ga ke kirim trus menerus <br> berarti server lagi gangguan lu tunggu beberapa saat lagi.</div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button></div>
+            </div>
         </div>
     </div>
-</div>
+    <button id="copySelectedBtn" style="font-weight:bold" class="btn btn-danger shadow">Copy Pesan yg Dicentang</button>
+    <div id="imageModal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center;">
+        <div id="closeModalBtn" style="position:absolute; top:20px; right:20px; width:40px; height:40px; background:red; color:white; border-radius:50%; text-align:center; line-height:40px; font-size:22px; font-weight:bold; cursor:pointer;">×</div>
+        <img id="modalImage" style="max-width:95%; max-height:95%; border-radius:10px; box-shadow:0 0 20px black; cursor:default;">
+    </div>
+    <div id="loadingPopup" style="display:none; position:fixed; z-index:99999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center;">
+        <div style="background:#111; padding:20px 25px; border-radius:12px; text-align:center; box-shadow:0 0 20px black; color:white; width:260px;">
+            <div class="spinner" style="width:50px; height:50px; border:5px solid #444; border-top:5px solid #00e676; border-radius:50%; margin:0 auto 15px; animation:spin 1s linear infinite;"></div>
+            <div style="font-weight:bold; font-size:16px;">Sedang mencoba mengirim...</div>
+            <div id="retryText" style="margin-top:8px; font-size:14px; color:#ccc;">Percobaan ke-1</div>
+        </div>
+    </div>
 </body>
-<script> 
-
-const copyBtn = document.getElementById('copySelectedBtn');
-
-document.addEventListener('change', function(e) {
-
-    if (e.target.classList.contains('message-checkbox')) {
-
-        const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
-
-        if (checkedBoxes.length > 0) {
-            $(copyBtn).stop(true,true).slideDown(200);
-        } else {
-            $(copyBtn).stop(true,true).slideUp(200);
-        }
-
-    }
-
-});
-
-copyBtn.addEventListener('click', function() {
-
-    const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
-
-    let textToCopy = '';
-
-    checkedBoxes.forEach(box => {
-        const messageDiv = box.nextElementSibling;
-        const originalText = messageDiv.getAttribute("data-copy");
-        textToCopy += originalText + "\n\n";
-    });
-
-    navigator.clipboard.writeText(textToCopy).then(() => {
-
-        copyBtn.innerText = "Berhasil Dicopy ?";
-
-        setTimeout(() => {
-            copyBtn.innerText = "Copy Semua Pesan Dicentang";
-        }, 1500);
-
-    });
-
-});
-
-//gambar
-const imageInput = document.getElementById("imageInput");
-const previewWrapper = document.getElementById("imagePreviewWrapper");
-const previewImg = document.getElementById("imagePreview");
-
-imageInput.addEventListener("change", function () {
-    const file = this.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        previewImg.src = e.target.result;
-        previewWrapper.style.display = "block";
-    };
-    reader.readAsDataURL(file);
-});
-
-function removeImage() {
-    imageInput.value = "";
-    previewWrapper.style.display = "none";
-}
-
-//uploadimage
-async function uploadImageToCloudinary(file) {
-
-    const cloudName = "netsui"; // cloud name kamu
-    const uploadPreset = "CHAT BOKEP"; // ganti dengan unsigned preset
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", uploadPreset);
-
-    const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        {
-            method: "POST",
-            body: formData
-        }
-    );
-
-    const data = await response.json();
-
-    if (!data.secure_url) {
-        throw new Error("Upload gambar gagal");
-    }
-
-    return data.secure_url;
-}
-
-const imageModal = document.getElementById("imageModal");
-const modalImage = document.getElementById("modalImage");
-const closeModalBtn = document.getElementById("closeModalBtn");
-
-function openImageModal(src) {
-    modalImage.src = src;
-    imageModal.style.display = "flex";
-    document.body.style.overflow = "hidden";
-}
-
-// klik tombol X
-closeModalBtn.addEventListener("click", function(e) {
-    e.stopPropagation();
-    closeImageModal();
-});
-
-// klik background (bukan gambar)
-imageModal.addEventListener("click", function(e) {
-    if (e.target === imageModal) {
-        closeImageModal();
-    }
-});
-
-function closeImageModal() {
-    imageModal.style.display = "none";
-    modalImage.src = "";
-    document.body.style.overflow = "auto";
-}
-</script>
-
-
 </html>
