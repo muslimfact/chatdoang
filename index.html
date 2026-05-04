@@ -89,6 +89,42 @@
         text-decoration: underline;
         word-break: break-all;
     }
+    
+    /* CSS untuk fitur toggle lihat selengkapnya */
+    .message-content-wrapper {
+        position: relative;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out;
+       
+    }
+    .message-content-wrapper.collapsed {
+        max-height: 80px !important;
+    }
+    .message-content-wrapper.expanded {
+        max-height: none !important;
+    }
+    .toggle-readmore-btn {
+        display: inline-block;
+        margin-top: 8px;
+        color:white ;
+        cursor: pointer;
+        text-align: center;
+        background: blue;
+      text-align: center;
+      width:100%;
+      padding:20px;
+      border-radius: 30px;
+      height: 40px;
+        font-size: 13px;
+        font-weight: bold;
+        text-decoration: none;
+        
+        border: none;
+        padding: 0;
+    }
+    .message-text-collapsed {
+        word-wrap: break-word;
+    }
     </style>
 </head>
 <body>
@@ -154,6 +190,55 @@
             return url;
         }
 
+        // Fungsi untuk mengecek apakah teks terlalu panjang (lebih dari 100 karakter)
+        function isTextTooLong(text) {
+            // Hapus tag HTML untuk perhitungan karakter sebenarnya
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
+            const plainText = tempDiv.textContent || tempDiv.innerText || '';
+            return plainText.length > 100;
+        }
+
+        // Fungsi untuk membuat pesan dengan toggle readmore
+        function createMessageWithToggle(htmlContent, fullTextPlain) {
+            const container = document.createElement('div');
+            container.className = 'message-text-collapsed';
+            
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'message-content-wrapper collapsed';
+            contentWrapper.innerHTML = htmlContent;
+            
+            container.appendChild(contentWrapper);
+            
+            // Cek apakah teks panjang
+            if (isTextTooLong(fullTextPlain || htmlContent)) {
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'toggle-readmore-btn';
+                toggleBtn.innerText = 'Lihat selengkapnya';
+                
+                let isExpanded = false;
+                toggleBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    if (isExpanded) {
+                        contentWrapper.classList.remove('expanded');
+                        contentWrapper.classList.add('collapsed');
+                        toggleBtn.innerText = 'Lihat selengkapnya';
+                    } else {
+                        contentWrapper.classList.remove('collapsed');
+                        contentWrapper.classList.add('expanded');
+                        toggleBtn.innerText = 'Perkecil';
+                    }
+                    isExpanded = !isExpanded;
+                };
+                container.appendChild(toggleBtn);
+            } else {
+                contentWrapper.classList.remove('collapsed');
+                contentWrapper.classList.add('expanded');
+            }
+            
+            return container;
+        }
+
         function appendSingleMessage(record) {
             const chatContainer = document.getElementById('chatContainer');
             const wrapper = document.createElement('div');
@@ -182,7 +267,7 @@
                 const link = match[0];
                 const title = message.substring(lastIndex, match.index).trim();
                 if (title !== '') {
-                    html += `<li style="margin-bottom:12px"><div style="font-weight:bold;margin-bottom:4px;">${title}</div><a href="${link}" target="_blank" class="urlhrefbody">${link}</a></li>`;
+                    html += `<li style="margin-bottom:12px"><div style="font-weight:bold;margin-bottom:4px;">${escapeHtml(title)}</div><a href="${link}" target="_blank" class="urlhrefbody">${link}</a></li>`;
                 } else {
                     html += `<li style="margin-bottom:12px"><a href="${link}" target="_blank" class="urlhrefbody">${link}</a></li>`;
                 }
@@ -190,10 +275,13 @@
             }
             const remainingText = message.substring(lastIndex).trim();
             if (remainingText !== '') {
-                html += `<li style="font-weight:bold;margin-bottom:8px;">${remainingText}</li>`;
+                html += `<li style="font-weight:bold;margin-bottom:8px;">${escapeHtml(remainingText)}</li>`;
             }
             html += '</ul>';
-            messageDiv.innerHTML = html;
+            
+            // Buat toggle container untuk teks pesan
+            const toggleContainer = createMessageWithToggle(html, message);
+            messageDiv.appendChild(toggleContainer);
 
             // Tampilkan gambar jika ada (support ImgBB dan Cloudinary)
             if (record.image_link && record.image_link !== "") {
@@ -240,6 +328,18 @@
             messageDiv.appendChild(timeSpan);
             chatContainer.appendChild(wrapper);
             chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
         }
 
         async function sendMessage() {
@@ -332,16 +432,19 @@
                         const link = match[0];
                         const title = message.substring(lastIndex, match.index).trim();
                         if (title !== '') {
-                            html += `<li style="margin-bottom:12px"><div style="font-weight:bold;margin-bottom:4px;">${title}</div><a href="${link}" target="_blank" class="urlhrefbody">${link}</a></li>`;
+                            html += `<li style="margin-bottom:12px"><div style="font-weight:bold;margin-bottom:4px;">${escapeHtml(title)}</div><a href="${link}" target="_blank" class="urlhrefbody">${link}</a></li>`;
                         } else {
                             html += `<li style="margin-bottom:12px"><a href="${link}" target="_blank" class="urlhrefbody">${link}</a></li>`;
                         }
                         lastIndex = urlRegex.lastIndex;
                     }
                     const remainingText = message.substring(lastIndex).trim();
-                    if (remainingText !== '') html += `<li style="font-weight:bold;margin-bottom:8px;">${remainingText}</li>`;
+                    if (remainingText !== '') html += `<li style="font-weight:bold;margin-bottom:8px;">${escapeHtml(remainingText)}</li>`;
                     html += '</ul>';
-                    messageDiv.innerHTML = html;
+                    
+                    // Buat toggle container untuk teks pesan
+                    const toggleContainer = createMessageWithToggle(html, message);
+                    messageDiv.appendChild(toggleContainer);
                     
                     if (record.image_link && record.image_link !== "") {
                         let finalImageUrl = record.image_link;
@@ -386,9 +489,9 @@
             }
         }
 
-        // ?? UPLOAD KE IMGBB DENGAN EXPIRE 90 HARI
+        // UPLOAD KE IMGBB DENGAN EXPIRE 90 HARI
         async function uploadImageToImgBB(file) {
-            const API_KEY = "26c0eb127e809f70a799624e64867975"; // GANTI DENGAN API KEY ASLI ANDA
+            const API_KEY = "26c0eb127e809f70a799624e64867975";
             const EXPIRATION_SECONDS = 90 * 24 * 3600;
             const formData = new FormData();
             formData.append("key", API_KEY);
