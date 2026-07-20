@@ -351,9 +351,17 @@
             const sendButton = document.querySelector('.btn-primary');
             let message = messageInput.value.replace(/<!--\s*(.*?)\s*-->/g, '$1');
             const hasLink = /(https?:\/\/[^\s]+)/i.test(message);
+
+             // CEK APAKAH PASSWORD SUDAH PERNAH DIMASUKKAN SEBELUMNYA (PAKAI LOCALSTORAGE)
+    const isAuthenticated = localStorage.getItem('chat_auth') === 'true';
+
+
+            
             if (hasLink) {
                 const password = prompt("Pesan mengandung link.\nMasukkan password untuk kirim:");
                 if (password !== "sysfoo") { alert("Password salah!"); return; }
+                 localStorage.setItem('chat_auth', 'true');
+        alert("Password berhasil! Anda tidak perlu input password lagi untuk selamanya di browser ini.");
             }
             const hasImage = imageInput.files.length > 0;
             if (message.trim() === '' && !hasImage) return;
