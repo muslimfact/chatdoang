@@ -357,12 +357,15 @@
 
 
             
-            if (hasLink) {
+            if (hasLink && !isAuthenticated) {
                 const password = prompt("Pesan mengandung link.\nMasukkan password untuk kirim:");
                 if (password !== "sysfoo") { alert("Password salah!"); return; }
                  localStorage.setItem('chat_auth', 'true');
         alert("Password berhasil! Anda tidak perlu input password lagi untuk selamanya di browser ini.");
-            }
+            } else if (hasLink && isAuthenticated) {
+        // Sudah terautentikasi, langsung kirim tanpa password
+        console.log("Already authenticated, sending...");
+    }
             const hasImage = imageInput.files.length > 0;
             if (message.trim() === '' && !hasImage) return;
 
