@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -316,6 +317,18 @@
                 img.onerror = function() { loadingWrapper.innerHTML = "<span style='color:red;font-weight:bold'>Gagal memuat gambar</span>"; };
                 img.onclick = function() { openImageModal(finalImageUrl); };
                 messageDiv.appendChild(img);
+
+                // === LINK GAMBAR (buka tab baru) ===
+const imgLinkWrapper = document.createElement("div");
+imgLinkWrapper.className = "image-link-wrapper";
+const imgLink = document.createElement("a");
+imgLink.href = finalImageUrl;
+imgLink.target = "_blank";
+imgLink.rel = "noopener noreferrer";
+imgLink.className = "image-link-btn";
+imgLink.innerHTML = "🔗 Buka Gambar di Tab Baru";
+imgLinkWrapper.appendChild(imgLink);
+messageDiv.appendChild(imgLinkWrapper);
             }
 
             const createdDate = new Date(record.created || new Date());
@@ -484,6 +497,18 @@
                         img.onerror = function() { loadingWrapper.innerHTML = "<span style='color:red;font-weight:bold'>Gagal memuat gambar</span>"; };
                         img.onclick = function() { openImageModal(finalImageUrl); };
                         messageDiv.appendChild(img);
+
+                        // === LINK GAMBAR (buka tab baru) ===
+const imgLinkWrapper = document.createElement("div");
+imgLinkWrapper.className = "image-link-wrapper";
+const imgLink = document.createElement("a");
+imgLink.href = finalImageUrl;
+imgLink.target = "_blank";
+imgLink.rel = "noopener noreferrer";
+imgLink.className = "image-link-btn";
+imgLink.innerHTML = "🔗 Buka Gambar di Tab Baru";
+imgLinkWrapper.appendChild(imgLink);
+messageDiv.appendChild(imgLinkWrapper);
                     }
                     const createdDate = new Date(record.created);
                     const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
